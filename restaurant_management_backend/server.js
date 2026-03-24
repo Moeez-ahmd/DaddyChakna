@@ -42,7 +42,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 app.get('/', (req, res) => {
-    res.send('API is running...');
+    res.json({ message: 'API is running...' });
 });
 
 // Import route definitions
