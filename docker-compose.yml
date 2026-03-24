@@ -5,8 +5,9 @@ services:
     build: ./restaurant_management_backend
     ports:
       - "5000:5000"
-    env_file:
-      - ./restaurant_management_backend/.env
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/daddy_app
+      - NODE_ENV=development
     depends_on:
       - mongo
 

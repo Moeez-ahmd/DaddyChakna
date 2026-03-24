@@ -29,4 +29,11 @@ jobs:
           scp -o StrictHostKeyChecking=no deployment.tar.gz ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~
           
           # Execute remote deployment
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "tar -xzvf deployment.tar.gz && sudo docker compose -f docker-compose.prod.yml up --build -d"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+            tar -xzvf deployment.tar.gz && \
+            echo 'MONGODB_URI=${{ secrets.MONGODB_URI }}' > .env.prod && \
+            echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> .env.prod && \
+            echo 'PORT=5000' >> .env.prod && \
+            echo 'NODE_ENV=production' >> .env.prod && \
+            sudo docker compose -f docker-compose.prod.yml up --build -d
+          "

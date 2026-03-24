@@ -6,7 +6,7 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - ./restaurant_management_backend/.env
+      - ./.env.prod
     # We remove 'mongo' service here since we use MongoDB Atlas
     environment:
       - NODE_ENV=production
