@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./restaurant_management_backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./restaurant_management_backend/.env
+    # We remove 'mongo' service here since we use MongoDB Atlas
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - /home/ubuntu/uploads:/usr/src/app/uploads
+
+  frontend:
+    build:
+      context: ./restaurant_management_admin
+      args:
+        # REPLACE with your EC2 Public IP or Domain
+        - VITE_API_URL=http://ec2-3-111-196-252.ap-south-1.compute.amazonaws.com:5000/api
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+# No volumes needed for local mongo anymore
