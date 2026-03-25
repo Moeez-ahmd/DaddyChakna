@@ -4,7 +4,7 @@ const User = require('../models/User');
 // Generate JWT
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d',
+        expiresIn: '1y',
     });
 };
 
@@ -107,8 +107,12 @@ const updateMe = async (req, res, next) => {
             if (req.file) {
                 user.profilePic = `/uploads/${req.file.filename}`;
             }
-            
+
             if (req.body.password) {
+                if (user.role === 'Staff') {
+                    res.status(403);
+                    throw new Error('Staff members cannot change their own password');
+                }
                 user.password = req.body.password;
             }
 

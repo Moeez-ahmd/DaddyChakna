@@ -31,7 +31,8 @@ const createStaffMember = async (req, res, next) => {
             email,
             password,
             role: role || 'Staff',
-            phone
+            phone,
+            profilePic: req.file ? `/uploads/${req.file.filename}` : 'default-profile.png'
         });
 
         if (user) {
@@ -63,10 +64,10 @@ const deleteStaffMember = async (req, res, next) => {
             throw new Error('Staff member not found');
         }
 
-        // Prevent admin from deleting themselves
+        // Prevent anyone from deleting themselves (Admins or Staff)
         if (staff._id.toString() === req.user._id.toString()) {
             res.status(400);
-            throw new Error('Admins cannot delete themselves');
+            throw new Error('Users cannot delete their own profiles from staff management');
         }
 
         await staff.deleteOne();
@@ -82,19 +83,34 @@ const deleteStaffMember = async (req, res, next) => {
 // @access  Private (Admin only)
 const updateStaffMember = async (req, res, next) => {
     try {
-        let staff = await User.findById(req.params.id);
+        const staff = await User.findById(req.params.id);
 
         if (!staff || (staff.role !== 'Staff' && staff.role !== 'Admin')) {
             res.status(404);
             throw new Error('Staff member not found');
         }
 
-        staff = await User.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
-        }).select('-password');
+        // Update fields
+        staff.name = req.body.name || staff.name;
+        staff.email = req.body.email || staff.email;
+        staff.role = req.body.role || staff.role;
+        staff.phone = req.body.phone || staff.phone;
 
-        res.status(200).json(staff);
+        if (req.body.password) {
+            staff.password = req.body.password;
+        }
+
+        if (req.file) {
+            staff.profilePic = `/uploads/${req.file.filename}`;
+        }
+
+        const updatedStaff = await staff.save();
+        
+        // Convert to object to hide password
+        const responseData = updatedStaff.toObject();
+        delete responseData.password;
+
+        res.status(200).json(responseData);
     } catch (error) {
         next(error);
     }
