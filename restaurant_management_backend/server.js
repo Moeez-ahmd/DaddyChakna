@@ -29,7 +29,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Static folder for uploads
 app.use('/uploads', express.static(uploadsDir));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api', express.static(path.join(__dirname, 'public')));
 
 // Debug Logger
 app.use((req, res, next) => {
