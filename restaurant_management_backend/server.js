@@ -29,7 +29,14 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Static folder for uploads
 app.use('/uploads', express.static(uploadsDir));
-app.use('/api', express.static(path.join(__dirname, 'public')));
+ 
+// Legal Pages
+app.get('/api/privacy-policy.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html'));
+});
+app.get('/api/contact-us.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'contact-us.html'));
+});
 
 // Debug Logger
 app.use((req, res, next) => {
