@@ -17,8 +17,8 @@ services:
     build:
       context: ./restaurant_management_admin
       args:
-        # REPLACE with your EC2 Public IP or Domain
-        - VITE_API_URL=http://ec2-3-111-196-252.ap-south-1.compute.amazonaws.com:5000/api
+        # Use same-origin Nginx proxy (backend is not exposed publicly on :5000)
+        - VITE_API_URL=/api
     ports:
       - "80:80"
     depends_on:

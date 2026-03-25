@@ -23,7 +23,7 @@ const createOrder = async (req, res, next) => {
             customerName: customerName || null,
             staff: (req.user.role === 'Admin' || req.user.role === 'Staff') ? req.user._id : null,
             items,
-            totalAmount,
+            totalAmount: Number(totalAmount).toFixed(2),
             orderType,
             deliveryAddress,
             tableNumber: orderType === 'Dine In' ? tableNumber : null,
@@ -78,7 +78,9 @@ const getMyOrders = async (req, res, next) => {
             query.status = 'Cancelled';
         }
 
-        const orders = await Order.find(query).sort({ createdAt: -1 });
+        const orders = await Order.find(query)
+            .populate('items.menuItem', 'name image price')
+            .sort({ createdAt: -1 });
         res.status(200).json(orders);
     } catch (error) {
         next(error);
@@ -127,6 +129,7 @@ const getOrders = async (req, res, next) => {
         const orders = await Order.find(query)
             .populate('user', 'id name')
             .populate('staff', 'name')
+            .populate('items.menuItem', 'name image price')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
@@ -150,14 +153,30 @@ const updateOrderStatus = async (req, res, next) => {
     try {
         const order = await Order.findById(req.params.id);
 
-        if (order) {
-            order.status = req.body.status || order.status;
-            const updatedOrder = await order.save();
-            res.status(200).json(updatedOrder);
-        } else {
+        if (!order) {
             res.status(404);
             throw new Error('Order not found');
         }
+
+        if (req.user.role === 'Customer') {
+            if (req.body.status !== 'Cancelled') {
+                res.status(403);
+                throw new Error('Customers can only cancel orders');
+            }
+            if (order.user && order.user.toString() !== req.user._id.toString()) {
+                res.status(403);
+                throw new Error('Not authorized to update this order');
+            }
+            const uncancelableStatuses = ['Ready', 'Served', 'Delivered', 'Completed', 'Cancelled'];
+            if (uncancelableStatuses.includes(order.status)) {
+                res.status(400);
+                throw new Error(`Order cannot be cancelled because it is already ${order.status}`);
+            }
+        }
+
+        order.status = req.body.status || order.status;
+        const updatedOrder = await order.save();
+        res.status(200).json(updatedOrder);
     } catch (error) {
         next(error);
     }

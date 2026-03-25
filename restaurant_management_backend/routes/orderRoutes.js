@@ -14,6 +14,6 @@ router.route('/:id')
     .put(protect, authorize('Admin'), updateOrder)
     .delete(protect, authorize('Admin'), deleteOrder);
 
-router.route('/:id/status').put(protect, authorize('Admin', 'Staff'), updateOrderStatus);
+router.route('/:id/status').put(protect, authorize('Admin', 'Staff', 'Customer'), updateOrderStatus);
 
 module.exports = router;
