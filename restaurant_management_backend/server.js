@@ -29,6 +29,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Static folder for uploads
 app.use('/uploads', express.static(uploadsDir));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Debug Logger
 app.use((req, res, next) => {
@@ -64,8 +65,8 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(statusCode).json({
-        message: err.message,
-        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+        message: typeof err === 'string' ? err : err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : (err.stack || null),
     });
 });
 

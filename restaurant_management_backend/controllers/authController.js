@@ -97,7 +97,7 @@ const getMe = async (req, res, next) => {
 // @access  Private
 const updateMe = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.user._id).select('+password');
 
         if (user) {
             user.name = req.body.name || user.name;
@@ -136,9 +136,29 @@ const updateMe = async (req, res, next) => {
     }
 };
 
+// @desc    Delete user profile
+// @route   DELETE /api/auth/me
+// @access  Private
+const deleteMe = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (user) {
+            await user.deleteOne();
+            res.status(200).json({ success: true, message: 'User deleted' });
+        } else {
+            res.status(404);
+            throw new Error('User not found');
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getMe,
     updateMe,
+    deleteMe,
 };
