@@ -80,7 +80,7 @@ const MenuManagement = () => {
     const getImageUrl = (image) => {
         if (!image) return '/no-item-image.jpg';
         if (image.startsWith('http') || image.startsWith('blob:')) return image;
-        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
         return `${baseUrl}${image}`;
     };
 

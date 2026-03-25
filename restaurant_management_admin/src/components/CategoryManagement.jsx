@@ -90,8 +90,7 @@ const CategoryManagement = () => {
     const getImageUrl = (image) => {
         if (!image) return '/no-image.jpg';
         if (image.startsWith('http') || image.startsWith('blob:')) return image;
-        // Assuming backend is on port 5000 as per previous context
-        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
         return `${baseUrl}${image}`;
     };
 

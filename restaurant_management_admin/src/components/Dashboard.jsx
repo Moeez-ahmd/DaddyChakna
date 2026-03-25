@@ -68,7 +68,7 @@ const Dashboard = () => {
     const getProfilePicUrl = (pic) => {
         if (!pic || pic === 'default-profile.png') return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'User');
         if (pic.startsWith('http') || pic.startsWith('blob:')) return pic;
-        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
         return `${baseUrl}${pic}`;
     };
 

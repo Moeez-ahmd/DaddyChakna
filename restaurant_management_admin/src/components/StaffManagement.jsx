@@ -61,7 +61,7 @@ const StaffManagement = () => {
     const getProfilePicUrl = (pic) => {
         if (!pic || pic === 'default-profile.png') return `https://ui-avatars.com/api/?name=${encodeURIComponent('User')}`;
         if (pic.startsWith('http') || pic.startsWith('blob:')) return pic;
-        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
         return `${baseUrl}${pic}`;
     };
 
@@ -120,13 +120,24 @@ const StaffManagement = () => {
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-dark-200">Staff Management</h1>
-                <button onClick={() => openModal()} className="btn-primary flex items-center gap-2">
-                    <UserPlus size={20} /> Add Member
-                </button>
+                <div className="flex gap-4">
+                    <button 
+                        onClick={() => {
+                            const me = staff.find(m => m._id === currentUser?._id) || currentUser;
+                            openModal(me);
+                        }} 
+                        className="btn-secondary flex items-center gap-2"
+                    >
+                        <User size={20} /> Update My Profile
+                    </button>
+                    <button onClick={() => openModal()} className="btn-primary flex items-center gap-2">
+                        <UserPlus size={20} /> Add Member
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {staff.map((member) => (
+                {staff.filter(member => member._id !== currentUser?._id).map((member) => (
                     <div key={member._id} className="glass-panel p-6 flex flex-col group relative">
                         <div className="w-20 h-20 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 mb-4 mx-auto overflow-hidden border-2 border-brand-50">
                             {member.profilePic && member.profilePic !== 'default-profile.png' ? (

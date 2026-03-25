@@ -290,7 +290,7 @@ const Orders = () => {
                                         <span className="text-xs font-medium text-gray-600">{order.staff?.name || 'Customer App'}</span>
                                     </td>
                                     <td className="p-4 text-sm text-gray-600">{order.items?.length || 0} items</td>
-                                    <td className="p-4 text-sm font-bold text-dark-200">₹{order.totalAmount}</td>
+                                    <td className="p-4 text-sm font-bold text-dark-200">₹{Number(order.totalAmount).toFixed(2)}</td>
                                     <td className="p-4">
                                         <select 
                                             className={`text-xs font-semibold px-2 py-1 rounded-full border-none focus:ring-2 focus:ring-brand-500 ${getStatusColor(order.status)}`}
@@ -471,7 +471,7 @@ const Orders = () => {
                                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Order Details</h4>
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="text-sm text-gray-600">Total Amount:</span>
-                                            <span className="font-bold text-brand-600">₹{selectedOrder.totalAmount}</span>
+                                            <span className="font-bold text-brand-600">₹{Number(selectedOrder.totalAmount).toFixed(2)}</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
                                             <span>Type:</span>
