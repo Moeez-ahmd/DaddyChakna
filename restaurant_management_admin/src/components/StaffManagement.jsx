@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, authService } from '../services/api';
 import { Plus, UserPlus, Shield, User, Trash2, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
@@ -8,7 +8,10 @@ const StaffManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'Staff', phone: '' });
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState('');
     const location = useLocation();
+    const currentUser = authService.getCurrentUser();
 
     useEffect(() => {
         fetchStaff();
@@ -34,26 +37,59 @@ const StaffManagement = () => {
                 email: member.email,
                 role: member.role,
                 phone: member.phone || '',
-                password: '' // Keep password empty for updates
+                profilePic: member.profilePic || '',
+                password: '' 
             });
             setIsEditing(true);
         } else {
             setFormData({ name: '', email: '', password: '', role: 'Staff', phone: '' });
             setIsEditing(false);
         }
+        setSelectedFile(null);
+        setPreviewUrl('');
         setIsModalOpen(true);
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const getProfilePicUrl = (pic) => {
+        if (!pic || pic === 'default-profile.png') return `https://ui-avatars.com/api/?name=${encodeURIComponent('User')}`;
+        if (pic.startsWith('http') || pic.startsWith('blob:')) return pic;
+        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        return `${baseUrl}${pic}`;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const data = new FormData();
+            data.append('name', formData.name);
+            data.append('email', formData.email);
+            data.append('role', formData.role);
+            data.append('phone', formData.phone);
+            
+            if (formData.password) {
+                data.append('password', formData.password);
+            }
+            
+            if (selectedFile) {
+                data.append('profilePic', selectedFile);
+            }
+
             if (isEditing) {
-                // Remove password if empty
-                const updateData = { ...formData };
-                if (!updateData.password) delete updateData.password;
-                await api.put(`/staff/${formData._id}`, updateData);
+                await api.put(`/staff/${formData._id}`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             } else {
-                await api.post('/staff', formData);
+                await api.post('/staff', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             }
             fetchStaff();
             closeModal();
@@ -92,8 +128,12 @@ const StaffManagement = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {staff.map((member) => (
                     <div key={member._id} className="glass-panel p-6 flex flex-col group relative">
-                        <div className="w-20 h-20 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 mb-4 mx-auto">
-                            {member.role === 'Admin' ? <Shield size={40} /> : <User size={40} />}
+                        <div className="w-20 h-20 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 mb-4 mx-auto overflow-hidden border-2 border-brand-50">
+                            {member.profilePic && member.profilePic !== 'default-profile.png' ? (
+                                <img src={getProfilePicUrl(member.profilePic)} className="w-full h-full object-cover" />
+                            ) : (
+                                member.role === 'Admin' ? <Shield size={40} /> : <User size={40} />
+                            )}
                         </div>
                         <div className="text-center mb-4">
                             <h3 className="font-bold text-xl text-dark-200">{member.name}</h3>
@@ -109,12 +149,14 @@ const StaffManagement = () => {
                             >
                                 Update
                             </button>
-                            <button 
-                                onClick={() => handleDelete(member._id)}
-                                className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm font-medium"
-                            >
-                                <Trash2 size={16} /> Remove
-                            </button>
+                            {currentUser?._id !== member._id && (
+                                <button 
+                                    onClick={() => handleDelete(member._id)}
+                                    className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm font-medium"
+                                >
+                                    <Trash2 size={16} /> Remove
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}
@@ -128,6 +170,21 @@ const StaffManagement = () => {
                         </button>
                         <h2 className="text-2xl font-bold mb-6">{isEditing ? 'Update Member Info' : 'Add Staff Member'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="flex flex-col items-center mb-6">
+                                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-brand-50 shadow-lg mb-2">
+                                    <img 
+                                        src={previewUrl || getProfilePicUrl(formData.profilePic)} 
+                                        className="w-full h-full object-cover" 
+                                        alt="Profile Preview"
+                                    />
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="text-xs file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-brand-50 file:text-brand-600"
+                                />
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                                 <input
