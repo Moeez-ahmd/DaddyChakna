@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import { ShoppingBag, DollarSign, Users, Utensils, TrendingUp } from 'lucide-react';
+import { api, ASSET_BASE_URL } from '../services/api';
+import { ShoppingBag, DollarSign, Users, Utensils, TrendingUp, X } from 'lucide-react';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -13,7 +13,14 @@ const Dashboard = () => {
     });
     const [loading, setLoading] = useState(true);
 
-    const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('userInfo')));
+    const [user, setUser] = useState(() => {
+        try {
+            const userInfo = localStorage.getItem('userInfo');
+            return userInfo ? JSON.parse(userInfo) : null;
+        } catch (e) {
+            return null;
+        }
+    });
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [profileData, setProfileData] = useState({ name: user?.name || '', phone: user?.phone || '', profilePic: user?.profilePic || '' });
     const [selectedFile, setSelectedFile] = useState(null);
@@ -68,8 +75,7 @@ const Dashboard = () => {
     const getProfilePicUrl = (pic) => {
         if (!pic || pic === 'default-profile.png') return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'User');
         if (pic.startsWith('http') || pic.startsWith('blob:')) return pic;
-        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
-        return `${baseUrl}${pic}`;
+        return `${ASSET_BASE_URL}${pic}`;
     };
 
     if (loading) return <div className="p-8"><p className="animate-pulse text-gray-400">Loading statistics...</p></div>;

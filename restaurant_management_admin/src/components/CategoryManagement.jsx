@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, ASSET_BASE_URL } from '../services/api';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 
 const CategoryManagement = () => {
-    const [user] = useState(() => JSON.parse(localStorage.getItem('userInfo')));
+    const [user] = useState(() => {
+        try {
+            const userInfo = localStorage.getItem('userInfo');
+            return userInfo ? JSON.parse(userInfo) : null;
+        } catch (e) {
+            return null;
+        }
+    });
     const [categories, setCategories] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentCategory, setCurrentCategory] = useState({ name: '', image: '', status: true });
@@ -18,7 +25,12 @@ const CategoryManagement = () => {
     const fetchCategories = async () => {
         try {
             const response = await api.get('/categories');
-            setCategories(response.data);
+            const nextCategories = Array.isArray(response.data)
+                ? response.data
+                : Array.isArray(response.data?.data)
+                    ? response.data.data
+                    : [];
+            setCategories(nextCategories);
         } catch (err) {
             console.error('Failed to fetch categories:', err);
         }
@@ -90,8 +102,7 @@ const CategoryManagement = () => {
     const getImageUrl = (image) => {
         if (!image) return '/no-image.jpg';
         if (image.startsWith('http') || image.startsWith('blob:')) return image;
-        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
-        return `${baseUrl}${image}`;
+        return `${ASSET_BASE_URL}${image}`;
     };
 
     return (

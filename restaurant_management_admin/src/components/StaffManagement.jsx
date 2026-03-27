@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api, authService } from '../services/api';
+import { api, authService, ASSET_BASE_URL } from '../services/api';
 import { Plus, UserPlus, Shield, User, Trash2, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
@@ -23,7 +23,12 @@ const StaffManagement = () => {
     const fetchStaff = async () => {
         try {
             const response = await api.get('/staff');
-            setStaff(response.data);
+            const nextStaff = Array.isArray(response.data)
+                ? response.data
+                : Array.isArray(response.data?.data)
+                    ? response.data.data
+                    : [];
+            setStaff(nextStaff);
         } catch (err) {
             console.error('Failed to fetch staff:', err);
         }
@@ -61,8 +66,7 @@ const StaffManagement = () => {
     const getProfilePicUrl = (pic) => {
         if (!pic || pic === 'default-profile.png') return `https://ui-avatars.com/api/?name=${encodeURIComponent('User')}`;
         if (pic.startsWith('http') || pic.startsWith('blob:')) return pic;
-        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
-        return `${baseUrl}${pic}`;
+        return `${ASSET_BASE_URL}${pic}`;
     };
 
     const handleSubmit = async (e) => {

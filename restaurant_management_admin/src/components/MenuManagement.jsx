@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, ASSET_BASE_URL } from '../services/api';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 
 const MenuManagement = () => {
-    const [user] = useState(() => JSON.parse(localStorage.getItem('userInfo')));
+    const [user] = useState(() => {
+        try {
+            const userInfo = localStorage.getItem('userInfo');
+            return userInfo ? JSON.parse(userInfo) : null;
+        } catch (e) {
+            return null;
+        }
+    });
     const [categories, setCategories] = useState([]);
     const [items, setItems] = useState([]);
     const [page, setPage] = useState(1);
@@ -29,7 +36,12 @@ const MenuManagement = () => {
     const fetchData = async () => {
         try {
             const cats = await api.get('/categories');
-            setCategories(cats.data);
+            const nextCategories = Array.isArray(cats.data)
+                ? cats.data
+                : Array.isArray(cats.data?.data)
+                    ? cats.data.data
+                    : [];
+            setCategories(nextCategories);
 
             const queryParams = new URLSearchParams({
                 page: page,
@@ -38,11 +50,17 @@ const MenuManagement = () => {
             }).toString();
 
             const menuItems = await api.get(`/menu?${queryParams}`);
-            setItems(menuItems.data.data);
-            setTotalPages(menuItems.data.pages);
+            const nextItems = Array.isArray(menuItems.data)
+                ? menuItems.data
+                : Array.isArray(menuItems.data?.data)
+                    ? menuItems.data.data
+                    : [];
+            const nextTotalPages = Number(menuItems.data?.pages) || 1;
+            setItems(nextItems);
+            setTotalPages(nextTotalPages);
 
-            if (cats.data.length > 0 && !currentItem.category) {
-                setCurrentItem(prev => ({ ...prev, category: cats.data[0]._id }));
+            if (nextCategories.length > 0 && !currentItem.category) {
+                setCurrentItem(prev => ({ ...prev, category: nextCategories[0]._id }));
             }
         } catch (err) {
             console.error(err);
@@ -80,8 +98,7 @@ const MenuManagement = () => {
     const getImageUrl = (image) => {
         if (!image) return '/no-item-image.jpg';
         if (image.startsWith('http') || image.startsWith('blob:')) return image;
-        const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
-        return `${baseUrl}${image}`;
+        return `${ASSET_BASE_URL}${image}`;
     };
 
     const handleFileChange = (e) => {

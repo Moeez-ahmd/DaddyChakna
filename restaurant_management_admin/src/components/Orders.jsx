@@ -3,7 +3,14 @@ import { api } from '../services/api';
 import { ClipboardList, Eye, Trash2, X, ChevronRight, Plus, Edit2, ShoppingCart, Search, Minus, Utensils } from 'lucide-react';
 
 const Orders = () => {
-    const [user] = useState(() => JSON.parse(localStorage.getItem('userInfo')));
+    const [user] = useState(() => {
+        try {
+            const userInfo = localStorage.getItem('userInfo');
+            return userInfo ? JSON.parse(userInfo) : null;
+        } catch (e) {
+            return null;
+        }
+    });
     const [orders, setOrders] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -41,7 +48,12 @@ const Orders = () => {
         try {
             // For the order creation modal, we want all items so search works correctly
             const res = await api.get('/menu?limit=100');
-            setMenuItems(res.data.data || []);
+            const nextMenuItems = Array.isArray(res.data)
+                ? res.data
+                : Array.isArray(res.data?.data)
+                    ? res.data.data
+                    : [];
+            setMenuItems(nextMenuItems);
         } catch (err) {
             console.error('Failed to fetch menu:', err);
         }
@@ -58,8 +70,14 @@ const Orders = () => {
                 status: statusFilter === 'All' ? '' : statusFilter
             }).toString();
             const response = await api.get(`/orders?${queryParams}`);
-            setOrders(response.data.data);
-            setTotalPages(response.data.pages);
+            const nextOrders = Array.isArray(response.data)
+                ? response.data
+                : Array.isArray(response.data?.data)
+                    ? response.data.data
+                    : [];
+            const nextTotalPages = Number(response.data?.pages) || 1;
+            setOrders(nextOrders);
+            setTotalPages(nextTotalPages);
             setLoading(false);
         } catch (err) {
             console.error('Failed to fetch orders:', err);

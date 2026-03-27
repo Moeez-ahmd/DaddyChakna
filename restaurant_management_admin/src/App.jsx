@@ -5,7 +5,7 @@ import MenuManagement from './components/MenuManagement';
 import CategoryManagement from './components/CategoryManagement';
 import StaffManagement from './components/StaffManagement';
 import Orders from './components/Orders';
-import { authService } from './services/api';
+import { authService, ASSET_BASE_URL } from './services/api';
 import { LayoutDashboard, Utensils, ListTree, ClipboardList, Users, Plus } from 'lucide-react';
 
 import Dashboard from './components/Dashboard';
@@ -14,7 +14,6 @@ const App = () => {
   const [user, setUser] = useState(() => authService.getCurrentUser());
   
   const isAuthenticated = !!(user && (user.role === 'Admin' || user.role === 'Staff'));
-  const apiBaseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
 
   if (!isAuthenticated) {
     return (
@@ -79,7 +78,7 @@ const App = () => {
                         <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold uppercase overflow-hidden border-2 border-brand-50">
                             {user.profilePic && user.profilePic !== 'default-profile.png' ? (
                                 <img 
-                                    src={user.profilePic.startsWith('http') ? user.profilePic : `${apiBaseUrl}${user.profilePic}`} 
+                                    src={user.profilePic.startsWith('http') ? user.profilePic : `${ASSET_BASE_URL}${user.profilePic}`} 
                                     className="w-full h-full object-cover" 
                                 />
                             ) : (
