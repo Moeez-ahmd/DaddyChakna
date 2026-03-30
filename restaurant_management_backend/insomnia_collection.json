@@ -1,0 +1,428 @@
+{
+	"_type": "export",
+	"__export_format": 4,
+	"__export_date": "2026-03-30T11:25:00.000Z",
+	"__export_source": "insomnia.desktop.app:v2023.5.8",
+	"resources": [
+		{
+			"_id": "wrk_restaurant_mgmt",
+			"parentId": null,
+			"modified": 1711800000000,
+			"created": 1711800000000,
+			"name": "Restaurant Management System",
+			"description": "Complete API collection for the Restaurant Management System.",
+			"scope": "collection",
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_base",
+			"parentId": "wrk_restaurant_mgmt",
+			"modified": 1711800000000,
+			"created": 1711800000000,
+			"name": "Base Environment",
+			"data": {
+				"baseUrl": "http://ec2-13-232-153-75.ap-south-1.compute.amazonaws.com/api",
+				"token": "YOUR_JWT_TOKEN_HERE"
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"baseUrl",
+					"token"
+				]
+			},
+			"color": null,
+			"isPrivate": false,
+			"metaSortKey": 1711800000000,
+			"_type": "environment"
+		},
+		{
+			"_id": "fld_auth",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Authentication",
+			"metaSortKey": -100,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_register",
+			"parentId": "fld_auth",
+			"url": "{{ _.baseUrl }}/auth/register",
+			"name": "Register",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"1234567890\"\n}"
+			},
+			"headers": [{ "name": "Content-Type", "value": "application/json" }],
+			"_type": "request"
+		},
+		{
+			"_id": "req_login",
+			"parentId": "fld_auth",
+			"url": "{{ _.baseUrl }}/auth/login",
+			"name": "Login",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"email\": \"admin@rest.com\",\n  \"password\": \"admin123\"\n}"
+			},
+			"headers": [{ "name": "Content-Type", "value": "application/json" }],
+			"_type": "request"
+		},
+		{
+			"_id": "req_me_get",
+			"parentId": "fld_auth",
+			"url": "{{ _.baseUrl }}/auth/me",
+			"name": "Get Profile",
+			"method": "GET",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		},
+		{
+			"_id": "fld_categories",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Categories",
+			"metaSortKey": -90,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_cat_list",
+			"parentId": "fld_categories",
+			"url": "{{ _.baseUrl }}/categories",
+			"name": "List Categories",
+			"method": "GET",
+			"_type": "request"
+		},
+		{
+			"_id": "req_cat_create",
+			"parentId": "fld_categories",
+			"url": "{{ _.baseUrl }}/categories",
+			"name": "Create Category",
+			"method": "POST",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "multipart/form-data" }
+			],
+			"body": {
+				"mimeType": "multipart/form-data",
+				"params": [
+					{ "name": "name", "value": "Fast Food" },
+					{ "name": "status", "value": "Active" },
+					{ "name": "image", "type": "file" }
+				]
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "req_cat_update",
+			"parentId": "fld_categories",
+			"url": "{{ _.baseUrl }}/categories/CAT_ID",
+			"name": "Update Category",
+			"method": "PUT",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "multipart/form-data" }
+			],
+			"body": {
+				"mimeType": "multipart/form-data",
+				"params": [
+					{ "name": "name", "value": "Beverages" },
+					{ "name": "image", "type": "file" }
+				]
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "req_cat_del",
+			"parentId": "fld_categories",
+			"url": "{{ _.baseUrl }}/categories/CAT_ID",
+			"name": "Delete Category",
+			"method": "DELETE",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		},
+		{
+			"_id": "fld_menu",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Menu Items",
+			"metaSortKey": -80,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_menu_list",
+			"parentId": "fld_menu",
+			"url": "{{ _.baseUrl }}/menu?page=1&limit=10&category=",
+			"name": "List Menu Items",
+			"method": "GET",
+			"_type": "request"
+		},
+		{
+			"_id": "req_menu_get",
+			"parentId": "fld_menu",
+			"url": "{{ _.baseUrl }}/menu/ITEM_ID",
+			"name": "Get Menu Item",
+			"method": "GET",
+			"_type": "request"
+		},
+		{
+			"_id": "req_menu_create",
+			"parentId": "fld_menu",
+			"url": "{{ _.baseUrl }}/menu",
+			"name": "Create Menu Item",
+			"method": "POST",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "multipart/form-data" }
+			],
+			"body": {
+				"mimeType": "multipart/form-data",
+				"params": [
+					{ "name": "name", "value": "Zinger Burger" },
+					{ "name": "description", "value": "Crispy chicken burger with mayo" },
+					{ "name": "price", "value": "850" },
+					{ "name": "category", "value": "65f1234567890abcdef12345" },
+					{ "name": "status", "value": "Available" },
+					{ "name": "image", "type": "file" }
+				]
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "req_menu_update",
+			"parentId": "fld_menu",
+			"url": "{{ _.baseUrl }}/menu/ITEM_ID",
+			"name": "Update Menu Item",
+			"method": "PUT",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "multipart/form-data" }
+			],
+			"body": {
+				"mimeType": "multipart/form-data",
+				"params": [
+					{ "name": "price", "value": "900" },
+					{ "name": "image", "type": "file" }
+				]
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "req_menu_del",
+			"parentId": "fld_menu",
+			"url": "{{ _.baseUrl }}/menu/ITEM_ID",
+			"name": "Delete Menu Item",
+			"method": "DELETE",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		},
+		{
+			"_id": "fld_deals",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Deals",
+			"metaSortKey": -70,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_deals_list",
+			"parentId": "fld_deals",
+			"url": "{{ _.baseUrl }}/deals",
+			"name": "List Deals",
+			"method": "GET",
+			"_type": "request"
+		},
+		{
+			"_id": "req_deal_create",
+			"parentId": "fld_deals",
+			"url": "{{ _.baseUrl }}/deals",
+			"name": "Create Deal",
+			"method": "POST",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "multipart/form-data" }
+			],
+			"body": {
+				"mimeType": "multipart/form-data",
+				"params": [
+					{ "name": "name", "value": "Lunch Deal 1" },
+					{ "name": "description", "value": "Burger + Fries + Drink" },
+					{ "name": "dealPrice", "value": "1200" },
+					{ "name": "originalPrice", "value": "1500" },
+					{ "name": "menuItems", "value": "[{\"menuItem\":\"65f1234567890abcdef12345\",\"quantity\":1}]" },
+					{ "name": "image", "type": "file" }
+				]
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "fld_banners",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Banners",
+			"metaSortKey": -60,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_banners_admin",
+			"parentId": "fld_banners",
+			"url": "{{ _.baseUrl }}/banners/admin",
+			"name": "Manage Banners (Admin)",
+			"method": "GET",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		},
+		{
+			"_id": "req_banner_create",
+			"parentId": "fld_banners",
+			"url": "{{ _.baseUrl }}/banners",
+			"name": "Create Banner",
+			"method": "POST",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "multipart/form-data" }
+			],
+			"body": {
+				"mimeType": "multipart/form-data",
+				"params": [
+					{ "name": "title", "value": "Ramadan Special Offer" },
+					{ "name": "purpose", "value": "Promotion" },
+					{ "name": "linkType", "value": "Deal" },
+					{ "name": "linkId", "value": "65f1234567890abcdef12345" },
+					{ "name": "isActive", "value": "true" },
+					{ "name": "image", "type": "file" }
+				]
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "fld_orders",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Orders",
+			"metaSortKey": -50,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_order_list",
+			"parentId": "fld_orders",
+			"url": "{{ _.baseUrl }}/orders?page=1&limit=10&status=&orderType=",
+			"name": "List All Orders",
+			"method": "GET",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		},
+		{
+			"_id": "req_order_create",
+			"parentId": "fld_orders",
+			"url": "{{ _.baseUrl }}/orders",
+			"name": "Create Order",
+			"method": "POST",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "application/json" }
+			],
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"items\": [{\n    \"menuItem\": \"65f1234567890abcdef12345\",\n    \"quantity\": 2,\n    \"priceAtPurchase\": 450\n  }],\n  \"totalAmount\": 900,\n  \"orderType\": \"Takeaway\",\n  \"customerName\": \"Ahmad Ali\",\n  \"deliveryAddress\": \"Street 5, G-11, Islamabad\"\n}"
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "req_order_status",
+			"parentId": "fld_orders",
+			"url": "{{ _.baseUrl }}/orders/65f1234567890abcdef12345/status",
+			"name": "Update Status",
+			"method": "PUT",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "application/json" }
+			],
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"status\": \"Completed\"\n}"
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "fld_staff",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Staff",
+			"metaSortKey": -40,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_staff_list",
+			"parentId": "fld_staff",
+			"url": "{{ _.baseUrl }}/staff",
+			"name": "List Staff",
+			"method": "GET",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		},
+		{
+			"_id": "req_staff_create",
+			"parentId": "fld_staff",
+			"url": "{{ _.baseUrl }}/staff",
+			"name": "Create Staff Member",
+			"method": "POST",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "multipart/form-data" }
+			],
+			"body": {
+				"mimeType": "multipart/form-data",
+				"params": [
+					{ "name": "name", "value": "Kamran Khan" },
+					{ "name": "email", "value": "kamran@rest.com" },
+					{ "name": "password", "value": "staff123" },
+					{ "name": "role", "value": "Staff" }
+				]
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "fld_cart",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Cart",
+			"metaSortKey": -35,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_cart_get",
+			"parentId": "fld_cart",
+			"url": "{{ _.baseUrl }}/cart",
+			"name": "Get Cart",
+			"method": "GET",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		},
+		{
+			"_id": "req_cart_update",
+			"parentId": "fld_cart",
+			"url": "{{ _.baseUrl }}/cart",
+			"name": "Update Cart",
+			"method": "PUT",
+			"headers": [
+				{ "name": "Authorization", "value": "Bearer {{ _.token }}" },
+				{ "name": "Content-Type", "value": "application/json" }
+			],
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"items\": [\n    {\n      \"menuItem\": \"65f1234567890abcdef12345\",\n      \"quantity\": 3\n    }\n  ]\n}"
+			},
+			"_type": "request"
+		},
+		{
+			"_id": "fld_finance",
+			"parentId": "wrk_restaurant_mgmt",
+			"name": "Finance",
+			"metaSortKey": -30,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_finance",
+			"parentId": "fld_finance",
+			"url": "{{ _.baseUrl }}/finance",
+			"name": "Get Finance Stats",
+			"method": "GET",
+			"headers": [{ "name": "Authorization", "value": "Bearer {{ _.token }}" }],
+			"_type": "request"
+		}
+	]
+}
