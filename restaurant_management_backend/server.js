@@ -58,6 +58,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/menu', require('./routes/menuItemRoutes'));
+app.use('/api/deals', require('./routes/dealRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));

@@ -1,4 +1,6 @@
 const Order = require('../models/Order');
+const MenuItem = require('../models/MenuItem');
+const Deal = require('../models/Deal');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -12,6 +14,23 @@ const createOrder = async (req, res, next) => {
             throw new Error('No order items');
         }
 
+        // Automatically detect itemType for each item in the order
+        const processedItems = await Promise.all(items.map(async (item) => {
+            const itemId = item.menuItem;
+            
+            const menuItem = await MenuItem.findById(itemId);
+            if (menuItem) {
+                return { ...item, itemType: 'MenuItem' };
+            }
+
+            const deal = await Deal.findById(itemId);
+            if (deal) {
+                return { ...item, itemType: 'Deal' };
+            }
+
+            return { ...item, itemType: 'MenuItem' };
+        }));
+
         // If Admin/Staff, they can specify a customerId
         let orderOwner = req.user._id;
         if ((req.user.role === 'Admin' || req.user.role === 'Staff') && customerId) {
@@ -22,7 +41,7 @@ const createOrder = async (req, res, next) => {
             user: (req.user.role === 'Admin' || req.user.role === 'Staff') && customerId ? customerId : (req.user.role === 'Customer' ? req.user._id : null),
             customerName: customerName || null,
             staff: (req.user.role === 'Admin' || req.user.role === 'Staff') ? req.user._id : null,
-            items,
+            items: processedItems,
             totalAmount: Number(totalAmount).toFixed(2),
             orderType,
             deliveryAddress,
