@@ -12,8 +12,14 @@ const cartSchema = new mongoose.Schema(
             {
                 menuItem: {
                     type: mongoose.Schema.ObjectId,
-                    ref: 'MenuItem',
+                    refPath: 'items.itemType',
                     required: true,
+                },
+                itemType: {
+                    type: String,
+                    required: true,
+                    enum: ['MenuItem', 'Deal'],
+                    default: 'MenuItem',
                 },
                 quantity: {
                     type: Number,
