@@ -26,26 +26,26 @@ const updateCart = async (req, res, next) => {
     try {
         const { items } = req.body;
 
-        // Automatically detect itemType for each item
-        const processedItems = await Promise.all(items.map(async (item) => {
-            const itemId = item.menuItem;
-            
-            // Check if it's a MenuItem
-            const menuItem = await MenuItem.findById(itemId);
-            if (menuItem) {
-                return { ...item, itemType: 'MenuItem' };
-            }
+        // Automatically detect itemType for each item efficiently
+        const itemIds = items.map(item => item.menuItem);
+        const [menuItems, deals] = await Promise.all([
+            MenuItem.find({ _id: { $in: itemIds } }).select('_id'),
+            Deal.find({ _id: { $in: itemIds } }).select('_id')
+        ]);
 
-            // Check if it's a Deal
-            const deal = await Deal.findById(itemId);
-            if (deal) {
+        const menuItemIdSet = new Set(menuItems.map(m => m._id.toString()));
+        const dealIdSet = new Set(deals.map(d => d._id.toString()));
+
+        const processedItems = items.map(item => {
+            const idStr = item.menuItem.toString();
+            if (menuItemIdSet.has(idStr)) {
+                return { ...item, itemType: 'MenuItem' };
+            } else if (dealIdSet.has(idStr)) {
                 return { ...item, itemType: 'Deal' };
             }
+            return { ...item, itemType: 'MenuItem' }; // Default fallback
+        });
 
-            // Fallback or error if not found? 
-            // We'll keep it as MenuItem by default but this might cause issues if ID is invalid
-            return { ...item, itemType: 'MenuItem' };
-        }));
 
         let cart = await Cart.findOne({ user: req.user._id });
 

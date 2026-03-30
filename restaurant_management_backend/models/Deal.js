@@ -15,13 +15,10 @@ const dealSchema = new mongoose.Schema(
             type: Number,
             required: [true, 'Please add a price'],
         },
-<<<<<<< HEAD
-=======
         image: {
             type: String,
             default: 'no-deal-image.jpg',
         },
->>>>>>> 2647102eec04afbcaae065ce958827a1d78edf34
         menuItems: [
             {
                 menuItem: {
@@ -31,15 +28,11 @@ const dealSchema = new mongoose.Schema(
                 },
                 quantity: {
                     type: Number,
-<<<<<<< HEAD
-=======
                     required: true,
->>>>>>> 2647102eec04afbcaae065ce958827a1d78edf34
                     default: 1,
                 },
             },
         ],
-<<<<<<< HEAD
         startDate: {
             type: Date,
             required: [true, 'Please add a start date'],
@@ -48,14 +41,7 @@ const dealSchema = new mongoose.Schema(
             type: Date,
             required: [true, 'Please add an end date'],
         },
-        image: {
-            type: String,
-            default: 'no-deal-image.jpg',
-        },
         isAvailable: {
-=======
-        isActive: {
->>>>>>> 2647102eec04afbcaae065ce958827a1d78edf34
             type: Boolean,
             default: true,
         },
