@@ -63,6 +63,7 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
 app.use('/api/staff', require('./routes/staffRoutes'));
+app.use('/api/banners', require('./routes/bannerRoutes'));
 
 // Error handler middlewares
 app.use((req, res, next) => {

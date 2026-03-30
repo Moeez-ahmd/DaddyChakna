@@ -29,6 +29,8 @@ const Orders = () => {
     // For new order creation
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState('menu');
+    const [deals, setDeals] = useState([]);
     const [newOrder, setNewOrder] = useState({
         customerName: '',
         orderType: 'Pickup',
@@ -42,7 +44,17 @@ const Orders = () => {
 
     useEffect(() => {
         fetchMenu();
+        fetchDeals();
     }, []);
+
+    const fetchDeals = async () => {
+        try {
+            const res = await api.get('/deals');
+            setDeals(res.data);
+        } catch (err) {
+            console.error('Failed to fetch deals:', err);
+        }
+    };
 
     const fetchMenu = async () => {
         try {
@@ -150,6 +162,10 @@ const Orders = () => {
 
     const filteredMenu = menuItems.filter(item => 
         item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const filteredDeals = deals.filter(deal => 
+        deal.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const filteredOrders = orders || [];
@@ -579,8 +595,23 @@ const Orders = () => {
                             {/* Menu Selection */}
                             <div className="flex-1 overflow-y-auto pr-4 border-r pr-8 flex flex-col">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h4 className="font-bold text-sm text-gray-400 uppercase tracking-widest">Select Items</h4>
-                                    <div className="relative w-64">
+                                    <div className="flex gap-2">
+                                        <button 
+                                            type="button"
+                                            onClick={() => setActiveTab('menu')}
+                                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${activeTab === 'menu' ? 'bg-brand-600 text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                                        >
+                                            Menu Items
+                                        </button>
+                                        <button 
+                                            type="button"
+                                            onClick={() => setActiveTab('deals')}
+                                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${activeTab === 'deals' ? 'bg-brand-600 text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                                        >
+                                            Deals
+                                        </button>
+                                    </div>
+                                    <div className="relative w-56">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                         <input 
                                             type="text"
@@ -592,25 +623,49 @@ const Orders = () => {
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {filteredMenu.map(item => (
-                                        <div key={item._id} className="p-3 border border-gray-100 rounded-xl hover:bg-brand-50/20 transition-all group flex flex-col justify-between">
-                                            <div className="flex gap-3">
-                                                <div className="w-12 h-12 rounded-lg bg-gray-50 overflow-hidden flex-shrink-0">
-                                                    <img src={item.image} className="w-full h-full object-cover" />
+                                    {activeTab === 'menu' ? (
+                                        filteredMenu.map(item => (
+                                            <div key={item._id} className="p-3 border border-gray-100 rounded-xl hover:bg-brand-50/20 transition-all group flex flex-col justify-between">
+                                                <div className="flex gap-3">
+                                                    <div className="w-12 h-12 rounded-lg bg-gray-50 overflow-hidden flex-shrink-0">
+                                                        <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-sm text-dark-200">{item.name}</p>
+                                                        <p className="text-xs text-brand-600 font-bold">₹{item.price}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-sm text-dark-200">{item.name}</p>
-                                                    <p className="text-xs text-brand-600 font-bold">₹{item.price}</p>
-                                                </div>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => addToCart(item)}
+                                                    className="mt-3 w-full py-1.5 text-xs bg-brand-50 text-brand-600 rounded-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
+                                                >
+                                                    <Plus size={14} /> Add
+                                                </button>
                                             </div>
-                                            <button 
-                                                onClick={() => addToCart(item)}
-                                                className="mt-3 w-full py-1.5 text-xs bg-brand-50 text-brand-600 rounded-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
-                                            >
-                                                <Plus size={14} /> Add
-                                            </button>
-                                        </div>
-                                    ))}
+                                        ))
+                                    ) : (
+                                        filteredDeals.map(deal => (
+                                            <div key={deal._id} className="p-3 border border-gray-100 rounded-xl hover:bg-brand-50/20 transition-all group flex flex-col justify-between">
+                                                <div className="flex gap-3">
+                                                    <div className="w-12 h-12 rounded-lg bg-gray-50 overflow-hidden flex-shrink-0">
+                                                        <img src={deal.image} className="w-full h-full object-cover" alt={deal.name} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-sm text-dark-200">{deal.name} <span className="bg-orange-100 text-orange-600 text-[10px] px-1 rounded ml-1">DEAL</span></p>
+                                                        <p className="text-xs text-brand-600 font-bold">₹{deal.price}</p>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => addToCart(deal)}
+                                                    className="mt-3 w-full py-1.5 text-xs bg-brand-50 text-brand-600 rounded-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
+                                                >
+                                                    <Plus size={14} /> Add
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 

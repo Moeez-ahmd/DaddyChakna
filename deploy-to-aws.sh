@@ -4,8 +4,8 @@
 # DNS: ec2-3-111-196-252.ap-south-1.compute.amazonaws.com
 # PEM: daddys-chakna-key.pem
 
-AWS_DNS="ec2-3-111-196-252.ap-south-1.compute.amazonaws.com"
-PEM_FILE="daddys-chakna-key.pem"
+AWS_DNS="ec2-13-232-153-75.ap-south-1.compute.amazonaws.com"
+PEM_FILE="daddy-chakna.pem"
 REMOTE_USER="ubuntu"
 REMOTE_DIR="/home/ubuntu/restaurant-app"
 
