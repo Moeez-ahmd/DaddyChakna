@@ -318,14 +318,6 @@ const MenuManagement = () => {
                                         className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100"
                                     />
                                 </div>
-                                <p className="text-[10px] text-gray-400 mt-2">Or paste a URL</p>
-                                <input
-                                    type="text"
-                                    className="input-field text-xs py-1"
-                                    placeholder="https://..."
-                                    value={currentItem.image}
-                                    onChange={(e) => setCurrentItem({ ...currentItem, image: e.target.value })}
-                                />
                             </div>
                             <button type="submit" className="btn-primary w-full py-3 mt-4">
                                 {isEditing ? 'Update Item' : 'Create Item'}

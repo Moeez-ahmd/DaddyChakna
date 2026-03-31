@@ -81,3 +81,49 @@ export const authService = {
         }
     }
 };
+
+// Deal Service
+export const dealService = {
+    getDeals: async () => {
+        return await api.get('/deals');
+    },
+    getDeal: async (id) => {
+        return await api.get(`/deals/${id}`);
+    },
+    createDeal: async (formData) => {
+        return await api.post('/deals', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    updateDeal: async (id, formData) => {
+        return await api.put(`/deals/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    deleteDeal: async (id) => {
+        return await api.delete(`/deals/${id}`);
+    }
+};
+
+// Banner Service
+export const bannerService = {
+    getAllBanners: async () => {
+        return await api.get('/banners');
+    },
+    getBannerById: async (id) => {
+        return await api.get(`/banners/${id}`);
+    },
+    createBanner: async (formData) => {
+        return await api.post('/banners', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    updateBanner: async (id, formData) => {
+        return await api.put(`/banners/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    deleteBanner: async (id) => {
+        return await api.delete(`/banners/${id}`);
+    }
+};

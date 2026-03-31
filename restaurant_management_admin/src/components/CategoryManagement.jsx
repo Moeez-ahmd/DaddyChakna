@@ -173,14 +173,6 @@ const CategoryManagement = () => {
                                         className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100"
                                     />
                                 </div>
-                                <p className="text-[10px] text-gray-400 mt-2">Or paste a URL (optional legacy support)</p>
-                                <input
-                                    type="text"
-                                    placeholder="https://..."
-                                    className="input-field text-xs py-1"
-                                    value={currentCategory.image}
-                                    onChange={(e) => setCurrentCategory({ ...currentCategory, image: e.target.value })}
-                                />
                             </div>
                             <div className="flex items-center gap-2">
                                 <input

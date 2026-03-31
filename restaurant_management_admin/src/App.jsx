@@ -6,9 +6,13 @@ import CategoryManagement from './components/CategoryManagement';
 import StaffManagement from './components/StaffManagement';
 import Orders from './components/Orders';
 import { authService, ASSET_BASE_URL } from './services/api';
-import { LayoutDashboard, Utensils, ListTree, ClipboardList, Users, Plus } from 'lucide-react';
+import { LayoutDashboard, Utensils, ListTree, ClipboardList, Users, Plus, Image, Tag } from 'lucide-react';
+
 
 import Dashboard from './components/Dashboard';
+import BannerManagement from './components/BannerManagement';
+import DealManagement from './components/DealManagement';
+
 
 const App = () => {
   const [user, setUser] = useState(() => authService.getCurrentUser());
@@ -57,6 +61,12 @@ const App = () => {
                     <NavLink to="/orders" className={navLinkClass}>
                         <ClipboardList size={20} /> Orders
                     </NavLink>
+                    <NavLink to="/deals" className={navLinkClass}>
+                        <Tag size={20} /> Deals
+                    </NavLink>
+                    <NavLink to="/banners" className={navLinkClass}>
+                        <Image size={20} /> Banners
+                    </NavLink>
                     {user?.role === 'Admin' && (
                         <div className="space-y-1">
                             <NavLink to="/staff" className={navLinkClass}>
@@ -98,6 +108,8 @@ const App = () => {
                     <Route path="/categories" element={<CategoryManagement />} />
                     <Route path="/menu" element={<MenuManagement />} />
                     <Route path="/orders" element={<Orders />} />
+                    <Route path="/deals" element={<DealManagement />} />
+                    <Route path="/banners" element={<BannerManagement />} />
                     <Route path="/staff" element={<StaffManagement />} />
                     <Route path="*" element={<Navigate to="/dashboard" />} />
                 </Routes>

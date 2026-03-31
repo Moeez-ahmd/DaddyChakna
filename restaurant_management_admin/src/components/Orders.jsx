@@ -50,7 +50,12 @@ const Orders = () => {
     const fetchDeals = async () => {
         try {
             const res = await api.get('/deals');
-            setDeals(res.data);
+            const nextDeals = Array.isArray(res.data)
+                ? res.data
+                : Array.isArray(res.data?.data)
+                    ? res.data.data
+                    : [];
+            setDeals(nextDeals);
         } catch (err) {
             console.error('Failed to fetch deals:', err);
         }
@@ -137,12 +142,12 @@ const Orders = () => {
         }
     };
 
-    const addToCart = (item) => {
+    const addToCart = (item, type = 'MenuItem') => {
         const exists = cart.find(c => c.menuItem === item._id);
         if (exists) {
             setCart(cart.map(c => c.menuItem === item._id ? { ...c, quantity: c.quantity + 1 } : c));
         } else {
-            setCart([...cart, { menuItem: item._id, name: item.name, price: item.price, quantity: 1 }]);
+            setCart([...cart, { menuItem: item._id, name: item.name, price: item.price, quantity: 1, itemType: type }]);
         }
     };
 
@@ -182,6 +187,7 @@ const Orders = () => {
             const orderData = {
                 items: cart.map(item => ({
                     menuItem: item.menuItem,
+                    itemType: item.itemType || 'MenuItem',
                     quantity: item.quantity,
                     priceAtPurchase: item.price
                 })),
@@ -658,7 +664,7 @@ const Orders = () => {
                                                 </div>
                                                 <button 
                                                     type="button"
-                                                    onClick={() => addToCart(deal)}
+                                                    onClick={() => addToCart(deal, 'Deal')}
                                                     className="mt-3 w-full py-1.5 text-xs bg-brand-50 text-brand-600 rounded-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
                                                 >
                                                     <Plus size={14} /> Add
