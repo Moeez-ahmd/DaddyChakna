@@ -11,104 +11,85 @@
 
 ---
 
-## Server Details
+## CI/CD (automatic deploy)
 
-| Property | Value |
+Pushes to the **`main`** branch trigger GitHub Actions, which SSHs into EC2, syncs the repo to `origin/main`, writes `.env.prod` from secrets, and runs `docker compose ... up --build -d`.
+
+### 1. GitHub repository secrets
+
+In the repo: **Settings → Secrets and variables → Actions**, add:
+
+| Secret | Description |
 |---|---|
-| **Provider** | AWS EC2 (ap-south-1 / Mumbai) |
-| **Public DNS** | `ec2-13-232-153-75.ap-south-1.compute.amazonaws.com` |
-| **SSH User** | `ubuntu` |
-| **PEM Key** | `daddy-chakna.pem` (root of this repo) |
-| **App Directory** | `/home/ubuntu/restaurant-app` |
+| `EC2_SSH_KEY` | Full EC2 private key (`.pem` contents), including `BEGIN` / `END` lines |
+| `EC2_HOST` | Public DNS or IP, e.g. `ec2-xxx.ap-south-1.compute.amazonaws.com` |
+| `EC2_USER` | SSH user (usually `ubuntu`) |
+| `MONGODB_URI` | MongoDB connection string for production |
+| `JWT_SECRET` | Backend JWT secret |
+
+Optional:
+
+| Secret | Description |
+|---|---|
+| `EC2_APP_DIR` | App path on the server (default: `/home/ubuntu/restaurant-app`) |
+
+### 2. GitHub environment (optional)
+
+The workflow uses `environment: production` so you can restrict secrets to that environment or require approvals. If you prefer not to use environments, remove the `environment: production` line from `.github/workflows/deploy.yml`.
+
+### 3. EC2 prerequisites
+
+- Docker and Docker Compose plugin installed; `ubuntu` can run `sudo docker compose`.
+- A **git clone** of this repository at `/home/ubuntu/restaurant-app` (or your `EC2_APP_DIR`), with `origin` pointing at this GitHub repo.
+- If the repo is **private**, configure a [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys/deploy-keys) or other credentials on the server so `git fetch` works.
+
+Manual deploy from the **Actions** tab: run workflow **Deploy to AWS EC2** → **Run workflow**.
 
 ---
 
-## ⚡ Deploying New Changes (Recommended)
+## Server reference
 
-Push your code to GitHub first, then run the one-line deploy command from the **root of this repo**:
-
-```bash
-./deploy.sh
-```
-
-This script will:
-1. SSH into the EC2 server using the PEM key
-2. Run `git pull origin main` to fetch latest code
-3. Rebuild only the backend Docker container (`--no-deps backend`)
-4. Perform a health check on `http://localhost:5000/`
-5. Print the last 10 lines of backend logs
-
-> [!IMPORTANT]
-> You must have `daddy-chakna.pem` in the root directory and run `./deploy.sh` from there.
+| Property | Example / notes |
+|---|---|
+| **App directory** | `/home/ubuntu/restaurant-app` (or `EC2_APP_DIR`) |
+| **Compose file** | `docker-compose.prod.yml` |
 
 ---
 
-## First-Time EC2 Setup (Already Done ✅)
-
-If you ever provision a new EC2 instance, follow these steps:
+## First-time EC2 setup
 
 ### 1. SSH into the server
-```bash
-chmod 400 daddy-chakna.pem
-ssh -i daddy-chakna.pem ubuntu@<YOUR-EC2-DNS>
-```
+
+Use your AWS key locally (do not commit `.pem` files to git).
 
 ### 2. Install Docker
+
 ```bash
 curl -fsSL https://get.docker.com | sudo sh
 sudo usermod -aG docker ubuntu
-newgrp docker
 ```
 
 ### 3. Clone the repository
+
 ```bash
 cd /home/ubuntu
 git clone https://github.com/Moeez-ahmd/DaddyChakna.git restaurant-app
 cd restaurant-app
 ```
 
-### 4. Create the production environment file
-```bash
-nano .env.prod
-```
+### 4. Deploy
 
-Add the following (replace values as needed):
-```env
-NODE_ENV=production
-MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<db>
-JWT_SECRET=<your-strong-secret>
-VITE_API_URL=/api
-```
-
-### 5. Build and start Docker containers
-```bash
-sudo docker compose -f docker-compose.prod.yml up --build -d
-```
-
-### 6. Verify it's running
-```bash
-curl http://localhost:5000/
-# Expected: {"message":"API is running..."}
-```
+Configure GitHub secrets as above, then push to `main` or run the workflow manually. `.env.prod` is created on each deploy from secrets (you do not need a permanent `.env.prod` on disk for CI, though you may keep one for emergency SSH use).
 
 ---
 
-## Manual SSH Commands
+## Useful SSH commands (debugging)
 
 ```bash
-# SSH into server
-ssh -i daddy-chakna.pem ubuntu@ec2-13-232-153-75.ap-south-1.compute.amazonaws.com
+ssh -i your-key.pem ubuntu@<EC2_HOST>
 
-# Check running containers
 sudo docker compose -f docker-compose.prod.yml ps
-
-# View backend logs (live)
 sudo docker compose -f docker-compose.prod.yml logs -f backend
-
-# Restart backend only
-sudo docker compose -f docker-compose.prod.yml restart backend
-
-# Rebuild frontend + backend (full redeploy)
 sudo docker compose -f docker-compose.prod.yml up --build -d
 ```
 
@@ -116,7 +97,7 @@ sudo docker compose -f docker-compose.prod.yml up --build -d
 
 ## API Endpoints (Production)
 
-Base URL: `http://ec2-13-232-153-75.ap-south-1.compute.amazonaws.com:5000`
+Use your server’s public URL. Admin nginx typically proxies `/api` to the backend.
 
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
@@ -136,18 +117,14 @@ Base URL: `http://ec2-13-232-153-75.ap-south-1.compute.amazonaws.com:5000`
 
 ## Troubleshooting
 
+**Workflow fails on `git fetch`?**  
+Ensure the clone exists, `origin` is correct, and for private repos add deploy keys or a credential helper on the EC2 instance.
+
 **Backend not responding?**
+
 ```bash
 sudo docker compose -f docker-compose.prod.yml logs --tail=50 backend
 ```
 
-**Port 5000 blocked?**
-- Ensure the EC2 Security Group has an **Inbound Rule** for port `5000` from `0.0.0.0/0`.
-
-**MongoDB connection error?**
-- Verify the `MONGODB_URI` in `.env.prod` is correct.
-- Ensure the EC2 IP is whitelisted in MongoDB Atlas > Network Access.
-
-**Git pull fails?**
-- The repo is public, so HTTPS cloning works without credentials.
-- If you get "not a git repo" errors, delete and re-clone: `rm -rf ~/restaurant-app && git clone https://github.com/Moeez-ahmd/DaddyChakna.git restaurant-app`
+**MongoDB connection error?**  
+Check `MONGODB_URI` in GitHub secrets and Atlas network access (allow EC2 egress IP if required).

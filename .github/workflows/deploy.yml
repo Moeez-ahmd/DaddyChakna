@@ -4,36 +4,76 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Write .env.prod (safe for special characters)
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          python3 << 'PY'
+          import os
+          out = (
+              f"MONGODB_URI={os.environ['MONGODB_URI']}\n"
+              f"JWT_SECRET={os.environ['JWT_SECRET']}\n"
+              "PORT=5000\n"
+              "NODE_ENV=production\n"
+              "VITE_API_URL=/api\n"
+          )
+          open(".env.prod.deploy", "w", encoding="utf-8").write(out)
+          PY
 
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Deploy to EC2
+      - name: Pull latest code on EC2
+        env:
+          APP_DIR: ${{ secrets.EC2_APP_DIR }}
         run: |
-          # Package the code
-          tar --exclude="node_modules" --exclude=".git" -czvf deployment.tar.gz .
-          
-          # Upload to EC2
-          scp -o StrictHostKeyChecking=no deployment.tar.gz ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~
-          
-          # Execute remote deployment
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
-            tar -xzvf deployment.tar.gz && \
-            echo 'MONGODB_URI=${{ secrets.MONGODB_URI }}' > .env.prod && \
-            echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> .env.prod && \
-            echo 'PORT=5000' >> .env.prod && \
-            echo 'NODE_ENV=production' >> .env.prod && \
-            sudo docker compose -f docker-compose.prod.yml up --build -d
-          "
+          TARGET_DIR="${APP_DIR:-/home/ubuntu/restaurant-app}"
+          ssh -o StrictHostKeyChecking=no \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            bash -s -- "$TARGET_DIR" << 'REMOTE'
+          set -euxo pipefail
+          APP_DIR="$1"
+          cd "$APP_DIR"
+          git fetch origin main
+          git reset --hard origin/main
+          REMOTE
+
+      - name: Upload environment file (after git reset)
+        run: |
+          APP_DIR="${{ secrets.EC2_APP_DIR }}"
+          if [ -z "$APP_DIR" ]; then APP_DIR="/home/ubuntu/restaurant-app"; fi
+          scp -o StrictHostKeyChecking=no \
+            .env.prod.deploy \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${APP_DIR}/.env.prod"
+
+      - name: Build and restart containers
+        env:
+          APP_DIR: ${{ secrets.EC2_APP_DIR }}
+        run: |
+          TARGET_DIR="${APP_DIR:-/home/ubuntu/restaurant-app}"
+          ssh -o StrictHostKeyChecking=no \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            bash -s -- "$TARGET_DIR" << 'REMOTE'
+          set -euxo pipefail
+          APP_DIR="$1"
+          cd "$APP_DIR"
+          sudo docker compose -f docker-compose.prod.yml up --build -d
+          sudo docker compose -f docker-compose.prod.yml ps
+          curl -sfS http://127.0.0.1:5000/ >/dev/null && echo "Backend health OK" || echo "Backend health check skipped or failed (see logs)"
+          REMOTE
