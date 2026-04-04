@@ -11,7 +11,7 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - /home/ubuntu/uploads:/usr/src/app/uploads
+      - /home/ubuntu/uploads:/app/uploads
 
   frontend:
     build:
