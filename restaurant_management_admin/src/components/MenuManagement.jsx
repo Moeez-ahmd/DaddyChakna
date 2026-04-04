@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, ASSET_BASE_URL } from '../services/api';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, RefreshCw } from 'lucide-react';
 
 const MenuManagement = () => {
     const [user] = useState(() => {
@@ -18,6 +18,7 @@ const MenuManagement = () => {
     const [categoryFilter, setCategoryFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [currentItem, setCurrentItem] = useState({
         name: '',
         description: '',
@@ -111,6 +112,7 @@ const MenuManagement = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
             const formData = new FormData();
             formData.append('name', currentItem.name);
@@ -141,6 +143,8 @@ const MenuManagement = () => {
         } catch (err) {
             console.error('Failed to save menu item:', err);
             alert('Error saving menu item');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -319,8 +323,8 @@ const MenuManagement = () => {
                                     />
                                 </div>
                             </div>
-                            <button type="submit" className="btn-primary w-full py-3 mt-4">
-                                {isEditing ? 'Update Item' : 'Create Item'}
+                            <button type="submit" disabled={isSaving} className="btn-primary w-full py-3 mt-4 flex items-center justify-center">
+                                {isSaving ? <><RefreshCw size={18} className="animate-spin mr-2" /> Saving...</> : (isEditing ? 'Update Item' : 'Create Item')}
                             </button>
                         </form>
                     </div>

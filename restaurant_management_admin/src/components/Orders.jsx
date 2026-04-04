@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { ClipboardList, Eye, Trash2, X, ChevronRight, Plus, Edit2, ShoppingCart, Search, Minus, Utensils } from 'lucide-react';
+import { ClipboardList, Eye, Trash2, X, ChevronRight, Plus, Edit2, ShoppingCart, Search, Minus, Utensils, RefreshCw } from 'lucide-react';
 
 const Orders = () => {
     const [user] = useState(() => {
@@ -20,6 +20,7 @@ const Orders = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     
     // For order list filtering
     const [listSearchTerm, setListSearchTerm] = useState('');
@@ -182,6 +183,7 @@ const Orders = () => {
     const handleCreateOrder = async (e) => {
         e.preventDefault();
         if (cart.length === 0) return alert('Add at least one item');
+        setIsSaving(true);
 
         try {
             const orderData = {
@@ -205,11 +207,14 @@ const Orders = () => {
             fetchOrders();
         } catch (err) {
             console.error('Failed to create order:', err);
+        } finally {
+            setIsSaving(false);
         }
     };
 
     const handleUpdateOrder = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
             await api.put(`/orders/${selectedOrder._id}`, selectedOrder);
             setIsModalOpen(false);
@@ -217,6 +222,8 @@ const Orders = () => {
         } catch (err) {
             console.error('Failed to update order:', err);
             alert('Admin access required to modify order details');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -491,7 +498,9 @@ const Orders = () => {
                                         />
                                     </div>
                                 )}
-                                <button type="submit" className="btn-primary w-full py-3">Save Changes</button>
+                                <button type="submit" disabled={isSaving} className="btn-primary w-full py-3 flex items-center justify-center">
+                                    {isSaving ? <><RefreshCw size={18} className="animate-spin mr-2" /> Saving...</> : 'Save Changes'}
+                                </button>
                             </form>
                         ) : (
                             <>
@@ -802,10 +811,10 @@ const Orders = () => {
 
                                         <button 
                                             type="submit"
-                                            disabled={cart.length === 0}
-                                            className="btn-primary w-full py-4 text-sm font-bold shadow-lg shadow-brand-600/20"
+                                            disabled={cart.length === 0 || isSaving}
+                                            className="btn-primary w-full py-4 text-sm font-bold shadow-lg shadow-brand-600/20 flex flex-col items-center justify-center"
                                         >
-                                            Confirm Order
+                                            {isSaving ? <div className="flex items-center"><RefreshCw size={18} className="animate-spin mr-2" /> Processing...</div> : 'Confirm Order'}
                                         </button>
                                     </div>
                                 </form>

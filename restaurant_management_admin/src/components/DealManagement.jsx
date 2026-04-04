@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, ASSET_BASE_URL, dealService } from '../services/api';
-import { Plus, Edit2, Trash2, X, Tag, Calendar, Package } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Tag, Calendar, Package, RefreshCw } from 'lucide-react';
 
 const DealManagement = () => {
     const [user] = useState(() => {
@@ -16,6 +16,7 @@ const DealManagement = () => {
     const [menuItems, setMenuItems] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [currentDeal, setCurrentDeal] = useState({
         name: '',
         description: '',
@@ -128,6 +129,7 @@ const DealManagement = () => {
             alert('Please add at least one product to the deal');
             return;
         }
+        setIsSaving(true);
 
         try {
             const formData = new FormData();
@@ -155,6 +157,8 @@ const DealManagement = () => {
         } catch (err) {
             console.error('Failed to save deal:', err);
             alert('Error saving deal');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -394,8 +398,8 @@ const DealManagement = () => {
                                 </div>
                             </div>
 
-                            <button type="submit" className="w-full btn-primary py-4 rounded-2xl font-bold text-lg shadow-xl shadow-brand-500/20 mt-4">
-                                {isEditing ? 'Update Deal' : 'Publish Deal'}
+                            <button type="submit" disabled={isSaving} className="w-full btn-primary py-4 rounded-2xl font-bold text-lg shadow-xl shadow-brand-500/20 mt-4 flex items-center justify-center">
+                                {isSaving ? <><RefreshCw size={18} className="animate-spin mr-2" /> Saving...</> : (isEditing ? 'Update Deal' : 'Publish Deal')}
                             </button>
                         </form>
                     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, ASSET_BASE_URL } from '../services/api';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, RefreshCw } from 'lucide-react';
 
 const CategoryManagement = () => {
     const [user] = useState(() => {
@@ -17,7 +17,7 @@ const CategoryManagement = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [isEditing, setIsEditing] = useState(false);
-
+    const [isSaving, setIsSaving] = useState(false);
     useEffect(() => {
         fetchCategories();
     }, []);
@@ -38,6 +38,7 @@ const CategoryManagement = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
             const formData = new FormData();
             formData.append('name', currentCategory.name);
@@ -63,6 +64,8 @@ const CategoryManagement = () => {
             closeModal();
         } catch (err) {
             console.error('Failed to save category:', err);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -183,8 +186,8 @@ const CategoryManagement = () => {
                                 />
                                 <label htmlFor="status" className="text-sm font-medium text-gray-700">Active</label>
                             </div>
-                            <button type="submit" className="btn-primary w-full py-3 mt-4">
-                                {isEditing ? 'Update Category' : 'Create Category'}
+                            <button type="submit" disabled={isSaving} className="btn-primary w-full py-3 mt-4 flex items-center justify-center">
+                                {isSaving ? <><RefreshCw size={18} className="animate-spin mr-2" /> Saving...</> : (isEditing ? 'Update Category' : 'Create Category')}
                             </button>
                         </form>
                     </div>

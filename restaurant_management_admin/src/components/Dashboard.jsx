@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, ASSET_BASE_URL } from '../services/api';
-import { ShoppingBag, DollarSign, Users, Utensils, TrendingUp, X } from 'lucide-react';
+import { ShoppingBag, DollarSign, Users, Utensils, TrendingUp, X, RefreshCw } from 'lucide-react';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -25,6 +25,7 @@ const Dashboard = () => {
     const [profileData, setProfileData] = useState({ name: user?.name || '', phone: user?.phone || '', profilePic: user?.profilePic || '' });
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -42,6 +43,7 @@ const Dashboard = () => {
 
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
             const formData = new FormData();
             formData.append('name', profileData.name);
@@ -61,6 +63,8 @@ const Dashboard = () => {
             alert('Profile updated successfully!');
         } catch (err) {
             console.error('Update failed:', err);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -160,7 +164,9 @@ const Dashboard = () => {
                                 onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                             />
                         </div>
-                        <button type="submit" className="btn-primary w-full py-3 mt-4">Save Profile</button>
+                        <button type="submit" disabled={isSaving} className="btn-primary w-full py-3 mt-4 flex items-center justify-center">
+                            {isSaving ? <><RefreshCw size={18} className="animate-spin mr-2" /> Saving...</> : 'Save Profile'}
+                        </button>
                     </form>
                 </div>
             </div>

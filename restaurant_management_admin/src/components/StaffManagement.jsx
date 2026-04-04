@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { api, authService, ASSET_BASE_URL } from '../services/api';
-import { Plus, UserPlus, Shield, User, Trash2, X } from 'lucide-react';
+import { Plus, UserPlus, Shield, User, Trash2, X, RefreshCw } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 const StaffManagement = () => {
     const [staff, setStaff] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'Staff', phone: '' });
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
@@ -71,6 +72,7 @@ const StaffManagement = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
             const data = new FormData();
             data.append('name', formData.name);
@@ -100,6 +102,8 @@ const StaffManagement = () => {
         } catch (err) {
             console.error('Failed to save staff:', err);
             alert(err.response?.data?.message || 'Failed to save staff');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -252,8 +256,8 @@ const StaffManagement = () => {
                                     <option value="Admin">Admin</option>
                                 </select>
                             </div>
-                            <button type="submit" className="btn-primary w-full py-3 mt-4">
-                                {isEditing ? 'Update Member' : 'Create Member'}
+                            <button type="submit" disabled={isSaving} className="btn-primary w-full py-3 mt-4 flex items-center justify-center">
+                                {isSaving ? <><RefreshCw size={18} className="animate-spin mr-2" /> Saving...</> : (isEditing ? 'Update Member' : 'Create Member')}
                             </button>
                         </form>
                     </div>

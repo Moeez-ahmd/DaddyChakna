@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, ASSET_BASE_URL, bannerService, dealService } from '../services/api';
-import { Plus, Edit2, Trash2, X, Image as ImageIcon, Video, Link, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Image as ImageIcon, Video, Link, ExternalLink, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 const BannerManagement = () => {
     const [user] = useState(() => {
@@ -17,6 +17,7 @@ const BannerManagement = () => {
     const [deals, setDeals] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [currentBanner, setCurrentBanner] = useState({
         title: '',
         purpose: 'Advertisement',
@@ -104,6 +105,7 @@ const BannerManagement = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
             const formData = new FormData();
             formData.append('title', currentBanner.title);
@@ -133,6 +135,8 @@ const BannerManagement = () => {
         } catch (err) {
             console.error('Failed to save banner:', err);
             alert('Error saving banner');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -348,8 +352,8 @@ const BannerManagement = () => {
                                 </div>
                             </div>
 
-                            <button type="submit" className="w-full btn-primary py-4 rounded-2xl font-bold text-lg shadow-xl shadow-brand-500/20 mt-4">
-                                {isEditing ? 'Update Banner' : 'Publish Banner'}
+                            <button type="submit" disabled={isSaving} className="w-full btn-primary py-4 rounded-2xl font-bold text-lg shadow-xl shadow-brand-500/20 mt-4 flex items-center justify-center">
+                                {isSaving ? <><RefreshCw size={18} className="animate-spin mr-2" /> Saving...</> : (isEditing ? 'Update Banner' : 'Publish Banner')}
                             </button>
                         </form>
                     </div>
