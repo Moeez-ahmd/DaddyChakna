@@ -127,3 +127,18 @@ export const bannerService = {
         return await api.delete(`/banners/${id}`);
     }
 };
+
+// Home Media Service
+export const homeMediaService = {
+    getAllMedia: async () => {
+        return await api.get('/homemedia');
+    },
+    uploadMedia: async (formData) => {
+        return await api.post('/homemedia/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    deleteMedia: async (id) => {
+        return await api.delete(`/homemedia/${id}`);
+    }
+};

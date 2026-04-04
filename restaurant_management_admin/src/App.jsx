@@ -6,12 +6,13 @@ import CategoryManagement from './components/CategoryManagement';
 import StaffManagement from './components/StaffManagement';
 import Orders from './components/Orders';
 import { authService, ASSET_BASE_URL } from './services/api';
-import { LayoutDashboard, Utensils, ListTree, ClipboardList, Users, Plus, Image, Tag } from 'lucide-react';
+import { LayoutDashboard, Utensils, ListTree, ClipboardList, Users, Plus, Image, Tag, MonitorPlay } from 'lucide-react';
 
 
 import Dashboard from './components/Dashboard';
 import BannerManagement from './components/BannerManagement';
 import DealManagement from './components/DealManagement';
+import HomeMediaManagement from './components/HomeMediaManagement';
 
 
 const App = () => {
@@ -69,6 +70,9 @@ const App = () => {
                     </NavLink>
                     {user?.role === 'Admin' && (
                         <div className="space-y-1">
+                            <NavLink to="/homemedia" className={navLinkClass}>
+                                <MonitorPlay size={20} /> Home Media
+                            </NavLink>
                             <NavLink to="/staff" className={navLinkClass}>
                                 <Users size={20} /> Staff Management
                             </NavLink>
@@ -110,6 +114,7 @@ const App = () => {
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/deals" element={<DealManagement />} />
                     <Route path="/banners" element={<BannerManagement />} />
+                    <Route path="/homemedia" element={<HomeMediaManagement />} />
                     <Route path="/staff" element={<StaffManagement />} />
                     <Route path="*" element={<Navigate to="/dashboard" />} />
                 </Routes>

@@ -64,6 +64,7 @@ app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
 app.use('/api/staff', require('./routes/staffRoutes'));
 app.use('/api/banners', require('./routes/bannerRoutes'));
+app.use('/api/homemedia', require('./routes/homeMediaRoutes'));
 
 // Error handler middlewares
 app.use((req, res, next) => {
