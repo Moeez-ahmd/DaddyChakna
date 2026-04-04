@@ -8,17 +8,17 @@ const {
     deleteBanner,
 } = require('../controllers/bannerController');
 const { protect, authorize } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const mediaUpload = require('../middleware/mediaUploadMiddleware');
 
 router.route('/')
     .get(getBanners)
-    .post(protect, authorize('Admin'), upload.single('image'), createBanner);
+    .post(protect, authorize('Admin'), mediaUpload.single('image'), createBanner);
 
 router.route('/admin')
     .get(protect, authorize('Admin'), getAllBanners);
 
 router.route('/:id')
-    .put(protect, authorize('Admin'), upload.single('image'), updateBanner)
+    .put(protect, authorize('Admin'), mediaUpload.single('image'), updateBanner)
     .delete(protect, authorize('Admin'), deleteBanner);
 
 module.exports = router;

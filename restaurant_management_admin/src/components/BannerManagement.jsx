@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, ASSET_BASE_URL, bannerService, dealService } from '../services/api';
-import { Plus, Edit2, Trash2, X, Image as ImageIcon, Link, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Image as ImageIcon, Video, Link, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
 
 const BannerManagement = () => {
     const [user] = useState(() => {
@@ -187,8 +187,17 @@ const BannerManagement = () => {
                     banners.map(banner => (
                         <div key={banner._id} className="glass-panel overflow-hidden group relative flex flex-col">
                             <div className="aspect-[21/9] bg-gray-100 overflow-hidden relative">
-                                <img src={getImageUrl(banner.image)} alt={banner.title} className="w-full h-full object-cover" />
-                                <div className="absolute top-4 left-4 flex gap-2">
+                                {banner.mediaType === 'VIDEO' ? (
+                                    <>
+                                        <span className="absolute top-4 right-4 z-10 p-1.5 bg-black/60 rounded-lg text-white backdrop-blur-md">
+                                            <Video size={16} />
+                                        </span>
+                                        <video src={getImageUrl(banner.image)} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                                    </>
+                                ) : (
+                                    <img src={getImageUrl(banner.image)} alt={banner.title} className="w-full h-full object-cover" />
+                                )}
+                                <div className="absolute top-4 left-4 flex gap-2 z-10">
                                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm border ${
                                         banner.isActive 
                                         ? 'bg-green-500/20 text-green-700 border-green-500/30' 
@@ -312,11 +321,15 @@ const BannerManagement = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-bold text-gray-700">Banner Image (Landscape 21:9 Recommended)</label>
+                                    <label className="block text-sm font-bold text-gray-700">Banner Media (Landscape 21:9 Recommended)</label>
                                     <div className="flex flex-col gap-4">
                                         <div className="aspect-[21/9] rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 relative group">
                                             {(previewUrl || currentBanner.image) ? (
-                                                <img src={previewUrl || getImageUrl(currentBanner.image)} className="w-full h-full object-cover" />
+                                                (selectedFile?.type.startsWith('video/') || currentBanner.mediaType === 'VIDEO') ? (
+                                                    <video src={previewUrl || getImageUrl(currentBanner.image)} className="w-full h-full object-cover" autoPlay loop muted playsInline />
+                                                ) : (
+                                                    <img src={previewUrl || getImageUrl(currentBanner.image)} className="w-full h-full object-cover" />
+                                                )
                                             ) : (
                                                 <div className="flex flex-col items-center justify-center h-full text-gray-400">
                                                     <ImageIcon size={48} />
@@ -326,11 +339,11 @@ const BannerManagement = () => {
                                         </div>
                                         <input
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/*,video/*"
                                             onChange={handleFileChange}
                                             className="block w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-brand-600 file:text-white hover:file:bg-brand-700 transition-all pointer-events-auto cursor-pointer"
                                         />
-                                        <p className="text-[10px] text-gray-400">Allowed formats: JPG, PNG, WEBP. Max size: 5MB.</p>
+                                        <p className="text-[10px] text-gray-400">Allowed formats: JPG, PNG, WEBP, MP4, WEBM. Max size: 50MB.</p>
                                     </div>
                                 </div>
                             </div>

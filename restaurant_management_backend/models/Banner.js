@@ -10,6 +10,11 @@ const bannerSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Please add a banner image'],
         },
+        mediaType: {
+            type: String,
+            enum: ['IMAGE', 'VIDEO'],
+            default: 'IMAGE'
+        },
         purpose: {
             type: String,
             required: [true, 'Please add a purpose'],

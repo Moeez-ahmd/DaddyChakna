@@ -32,6 +32,7 @@ const createBanner = async (req, res, next) => {
         const bannerData = { ...req.body };
         if (req.file) {
             bannerData.image = `/uploads/${req.file.filename}`;
+            bannerData.mediaType = req.file.mimetype.startsWith('video/') ? 'VIDEO' : 'IMAGE';
         }
         
         if (bannerData.linkType === 'None' || bannerData.linkId === '') {
@@ -60,6 +61,7 @@ const updateBanner = async (req, res, next) => {
         const updateData = { ...req.body };
         if (req.file) {
             updateData.image = `/uploads/${req.file.filename}`;
+            updateData.mediaType = req.file.mimetype.startsWith('video/') ? 'VIDEO' : 'IMAGE';
         }
 
         if (updateData.linkType === 'None' || updateData.linkId === '') {
